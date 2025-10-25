@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz Battle Arena</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: radial-gradient(circle, #1a1a1a, #000);
+      color: #fff;
+      margin: 0;
+      padding: 0;
+    }
+    .arena-container {
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #222;
+      border: 4px solid #e60000;
+      border-radius: 12px;
+      box-shadow: 0 0 20px #e60000;
+    }
+    header h1 {
+      text-align: center;
+      font-size: 1.8em;
+      margin-bottom: 10px;
+    }
+    #timer {
+      text-align: center;
+      font-size: 1.2em;
+      margin-bottom: 20px;
+    }
+    #question-box h2 {
+      font-size: 1.4em;
+      margin-bottom: 10px;
+    }
+    #answer-options {
+      list-style: none;
+      padding: 0;
+    }
+    .answer-btn {
+      display: block;
+      width: 100%;
+      margin: 8px 0;
+      padding: 12px;
+      background-color: #333;
+      border: 2px solid #e60000;
+      color: #fff;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .answer-btn:hover {
+      background-color: #e60000;
+    }
+    footer {
+      margin-top: 20px;
+      text-align: center;
+    }
+    #next-button {
+      padding: 10px 20px;
+      background-color: #e60000;
+      border: none;
+      color: #fff;
+      font-size: 1em;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="arena-container">
+    <header>
+      <h1>🥊 Kilitech Quiz Battle Arena</h1>
+      <p>Round <span id="round-number">1</span> of 3</p>
+      <div id="timer">⏱️ Time: <span id="time">30</span>s</div>
+      <p>Current Player: <span id="current-player">Player 1</span></p>
+    </header>
+
+    <section id="question-box">
+      <h2 id="question-text">Loading question...</h2>
+      <ul id="answer-options">
+        <li><button class="answer-btn">Option A</button></li>
+        <li><button class="answer-btn">Option B</button></li>
+        <li><button class="answer-btn">Option C</button></li>
+        <li><button class="answer-btn">Option D</button></li>
+      </ul>
+    </section>
+
+    <footer>
+      <div id="score">Player 1 Score: <span id="score-value">0</span></div>
+      <button id="next-button">Next Question</button>
+    </footer>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        text: "What’s the correct calibration procedure for a PT100 sensor?",
+        options: ["Use ice bath", "Apply 24V", "Check resistance", "Use multimeter"],
+        correct: 2
+      },
+      {
+        text: "Decode this ladder logic snippet: What does TON do?",
+        options: ["Turns off output", "Delays ON", "Counts pulses", "Resets timer"],
+        correct: 1
+      },
+      {
+        text: "Which supplier delivers fastest under constraint X?",
+        options: ["Supplier A", "Supplier B", "Supplier C", "Supplier D"],
+        correct: 0
+      }
+    ];
+
+    let players = [
+      { name: "Player 1", score: 0 },
+      { name: "Player 2", score: 0 }
+    ];
+    let currentPlayer = 0;
+    let currentQuestion = 0;
+    let timeLeft = 30;
+    let timer;
+
+    function loadQuestion() {
+      const q = questions[currentQuestion];
+      document.getElementById("question-text").textContent = q.text;
+      const buttons = document.querySelectorAll(".answer-btn");
+      buttons.forEach((btn, i) => {
+        btn.textContent = q.options[i];
+        btn.onclick = () => checkAnswer(i);
+      });
+      document.getElementById("round-number").textContent = currentQuestion + 1;
+      document.getElementById("current-player").textContent = players[currentPlayer].name;
+      document.getElementById("score-value").textContent = players[currentPlayer].score;
+      startTimer();
+    }
+
+    function checkAnswer(index) {
+      if (index === questions[currentQuestion].correct) {
+        players[currentPlayer].score += 10;
+      }
+      stopTimer();
+      document.getElementById("score-value").textContent = players[currentPlayer].score;
+      currentPlayer = (currentPlayer + 1) % 2;
+    }
+
+    function startTimer() {
+      timeLeft = 30;
+      document.getElementById("time").textContent = timeLeft;
+      timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById("time").textContent = timeLeft;
+        if (timeLeft <= 0) {
+          stopTimer();
+        }
+      }, 1000);
+    }
+
+    function stopTimer() {
+      clearInterval(timer);
+    }
+
+    function assignBelt(score) {
+      if (score <= 30) return "🟢 Logic Learner";
+      if (score <= 60) return "🔵 PLC Practitioner";
+      if (score <= 90) return "🟣 Instrumentation Ace";
+      if (score <= 120) return "🔴 Troubleshooting Titan";
+      return "⚫ Automation Master";
+    }
+
+    document.getElementById("next-button").onclick = () => {
+      currentQuestion++;
+      if (currentQuestion < questions.length) {
+        loadQuestion();
+      } else {
+        document.getElementById("question-text").textContent = "Battle Complete!";
+        document.getElementById("answer-options").style.display = "none";
+        document.getElementById("next-button").style.display = "none";
+
+        let result = players.map(p => {
+          return `${p.name}: ${p.score} pts – Title: ${assignBelt(p.score)}`;
+        }).join("\n");
+
+        alert(result);
+      }
+    };
+
+    loadQuestion();
+  </script>
+</body>
+</html>
